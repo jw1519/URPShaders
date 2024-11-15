@@ -2,15 +2,18 @@ Shader "Custom/WaterShader"
 {
     Properties
     {
-        _Color("Base Color", Color) = (0.2, 0.8, 0.2, 1)
+        _Color("Base Color", Color) = (0.2, 0.8, 0.2, 0.5)
         _MainTex("Main Texture", 2D) = "white" {}
         _WindStrength("Wind Strength", Float) = 0.8
         _WindFrequency("Wind Frequency", Float) = 1.0
         _WindDirection("Wind Direction", Vector) = (1, 0, 1)
         _WaveDensity("Wave Density", Float) = 20.0
-        _Tiling("Texture Tiling", Vector) = (4.0, 4.0, 0.0, 0.0)
         _WaveHeight("Wave Height", Float) = 0.2
         _SwayStrength("Sway Strength", Float) = 0.1
+
+        _DepthGradientShallow("Depth Gradient Shallow", Color) = (0.325, 0.807, 0.971, 0.725)
+        _DepthGradientDeep("Depth Gradient Deep", Color) = (0.086, 0.407, 1, 0.749)
+        _DepthMaxDistance("Depth Maximum Distance", Float) = 1
     }
 
         SubShader
@@ -35,9 +38,15 @@ Shader "Custom/WaterShader"
                 float _WindFrequency;
                 float3 _WindDirection;
                 float _WaveDensity;
-                float4 _Tiling;
                 float _WaveHeight;
                 float _SwayStrength;
+
+                float4 _DepthGradientShallow;
+                float4 _DepthGradientDeep;
+
+                float _DepthMaxDistance;
+
+                sampler2D _CameraDepthTexture;
 
                 struct VertexInput
                 {
@@ -95,9 +104,6 @@ Shader "Custom/WaterShader"
                     float sway = sin(time + noiseOffset) * _SwayStrength;
                     worldPos.x += sway * normalizedDirection.x; // Sway along the X direction
                     worldPos.z += sway * normalizedDirection.z; // Sway along the Z direction
-
-                    // Apply tiling to UV coordinates
-                    OUT.uv = IN.uv * _Tiling.xy;
 
                     // Transform back to homogeneous clip space
                     OUT.positionHCS = TransformWorldToHClip(worldPos);
